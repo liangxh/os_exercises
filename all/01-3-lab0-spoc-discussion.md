@@ -20,24 +20,25 @@
 哪些困难（请分优先级）会阻碍你自主完成lab实验？
 - [x]  
 
->   1) 自己電腦上的ubuntu系統出錯
-2) 代碼理解錯誤
-3) 程序調試
+>   1) 环境配置出错
+2) 代碼文件導入出錯导致編譯不通過
+3) 代码理解错误
+4) 程序调试
 
 如何把一个在gdb中或执行过程中出现的物理/线性地址与你写的代码源码位置对应起来？
 - [x]  
 
->   gdb可以通過在可执行文件中記錄其在源代碼中的位置來對應物理/線性地址.
+>   gdb可以通过在可执行文件中记录其在源代码中的位置来对应物理/线性地址.
 
 了解函数调用栈对lab实验有何帮助？
 - [x]  
 
->   調用棧有助於進行調試.
+>   有助于了解之后的代码及进行调试.
 
 你希望从lab中学到什么知识？
 - [x]  
 
->   解操作系統對文件的關聯, 數據的管理, 進程的維謢等.
+>   了解操作系统对文件的关联, 数据的管理, 进程的维謢等.
 
 ---
 
@@ -48,17 +49,17 @@
 搭建好实验环境，请描述碰到的困难和解决的过程。
 - [x]  
 
-> 个人在原本Windows為操作系统的電腦上安裝了ubuntu操作系統, 在安裝過程遇到不同設置問題需要在網上查找解答, 並認識了透過bash安裝相應工具如eclipse-cdt.
+> 在執行文件時發現工具不全, 而學會了在ubuntu下透过bash安装相应工具,　如qemu, eclipse-cdt.
 
 熟悉基本的git命令行操作命令，从github上的[ucore git repo](http://www.github.com/chyyuu/ucore_lab)下载ucore lab实验
 - [x]  
 
-> 
+> 已下載
 
 尝试用qemu+gdb（or ECLIPSE-CDT）调试lab1
 - [x]  
 
-> 
+> 已嘗試
 
 对于如下的代码段，请说明”：“后面的数字是什么含义
 ```
@@ -77,7 +78,7 @@ struct gatedesc {
 ```
 - [x]  
 
-> 
+> 对应各个部分所占的字元数.
 
 对于如下的代码段，
 ```
@@ -102,12 +103,49 @@ SETGATE(intr, 0,1,2,3);
 请问执行上述指令后， intr的值是多少？
 - [x]  
 
-> 
+> 0x0000ee0000010002
 
 请分析 [list.h](https://github.com/chyyuu/ucore_lab/blob/master/labcodes/lab2/libs/list.h)内容中大致的含义，并能include这个文件，利用其结构和功能编写一个数据结构链表操作的小C程序
 - [x]  
 
 > 
+struct list_item{
+	struct list_entry entry;
+	int data;
+};
+
+void item_init(struct list_item* item, int data){
+	list_init((struct list_entry*)&list_item);
+	item->data = data;
+}
+
+void check_list(){	
+	int N = 10;
+	int i = 0;
+	struct list_item items[N];
+	for (i = 0; i < N; i++)
+		item_init(items + i, i);
+	for (i = 0; i < N - 1; i++)
+		list_add_after((struct list_entry*)(items + i), (struct list_entry*)(items + i + 1));
+	
+	struct list_entry* flag = (struct list_item*)(items);
+	int count = 0;
+	while (flag->next != flag){
+		int d = ((struct list_item*) flag)->data;
+		if (d == count){		
+			printf("MATCH! %d == %d\n", count++, d);
+		else {
+			printf("FAIL! %d != %d\n", count, d);
+			break;		
+		}	
+	}
+}
+
+int main(int argc, char* argv[]){
+	check_list();
+	printf("EXIT\n");
+	return 0;
+}
 
 ---
 
