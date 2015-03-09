@@ -108,7 +108,7 @@ GRUB属于第三方操作系统引导器, 一方面支持不同的操作系统�
  
 > Ucore中包括的系统调用及根据其功能分类如下
 >
-一、进程控制
+一、进程控制:
 [SYS_exit]              sys_exit, // 中止进程 
 [SYS_fork]              sys_fork, // 创建一个新进程
 [SYS_wait]              sys_wait, // 等待子进程终止
@@ -122,7 +122,7 @@ GRUB属于第三方操作系统引导器, 一方面支持不同的操作系统�
 [SYS_lab6_set_priority] sys_lab6_set_priority,
 [SYS_sleep]             sys_sleep,   // 睡眠
 >
-二、文件系统控制
+二、文件系统控制:
 1、文件读写操作
 [SYS_open]              sys_open,
 [SYS_close]             sys_close,
