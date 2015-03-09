@@ -106,6 +106,37 @@ GRUB属于第三方操作系统引导器, 一方面支持不同的操作系统�
   - 答案除了对上述两个要点都进行了正确阐述外，还进行了扩展和更丰富的说明（3分）
  ```
  
+> Ucore中包括的系统调用及根据其功能分类如下
+>
+一、进程控制
+[SYS_exit]              sys_exit, // 中止进程 
+[SYS_fork]              sys_fork, // 创建一个新进程
+[SYS_wait]              sys_wait, // 等待子进程终止
+[SYS_exec]              sys_exec, // 运行可执行文件
+[SYS_yield]             sys_yield, // 进程主动让出处理器,并将自己等候调度队列队尾
+[SYS_kill]              sys_kill, // 立即中止当前进程 
+[SYS_getpid]            sys_getpid, // 获取进程标识号
+[SYS_putc]              sys_putc,
+[SYS_pgdir]             sys_pgdir,
+[SYS_gettime]           sys_gettime, // 取时间
+[SYS_lab6_set_priority] sys_lab6_set_priority,
+[SYS_sleep]             sys_sleep,   // 睡眠
+>
+二、文件系统控制
+1、文件读写操作
+[SYS_open]              sys_open,
+[SYS_close]             sys_close,
+[SYS_read]              sys_read,
+[SYS_write]             sys_write,
+[SYS_seek]              sys_seek,
+[SYS_fsync]             sys_fsync,
+[SYS_dup]               sys_dup,
+2、文件系统操作
+[SYS_fstat]             sys_fstat,
+[SYS_getcwd]            sys_getcwd,
+[SYS_getdirentry]       sys_getdirentry
+
+ 
 ## 3.4 linux系统调用分析
  1. 通过分析[lab1_ex0](https://github.com/chyyuu/ucore_lab/blob/master/related_info/lab1/lab1-ex0.md)了解Linux应用的系统调用编写和含义。(w2l1)
  
