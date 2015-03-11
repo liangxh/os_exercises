@@ -49,7 +49,11 @@ lab1中的cprintf函数最终通过哪些外设完成了对字符串的输出？
  ```
 - [x]  
 
->  
+>  cprintf的函数调用过程如下:
+int cprintf() →int vcprintf() → void cputch() → cons_putc() → lpt_putc(c);
+ cga_putc(c);
+ serial_putc(c);
+ 其中lpt_putc把c输至并口, 然后cga_putc(c)把c打印到屏幕, 最后serial_putc把c输至串口. 对字符串中每个字符都依次进行这三步.
 
 ---
 
