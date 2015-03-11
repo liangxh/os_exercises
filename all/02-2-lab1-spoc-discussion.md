@@ -20,7 +20,10 @@ NOTICE
  ```
 - [x]  
 
->  
+>  于init.c kern_init()中, 
+首先调用pic_init(), 对8259A中断控制器进行初始化, 先对中断屏蔽, 再设置master和slave.
+后调用idt_init(), 对中断向量逐个进行初始化, 并以lidt设置IDT的所在地址 (  lidt(&idt_pd); ).
+最后调用clock_init(), 设置8253时钟, 并对时钟使能(  pic_enable(IRQ_TIMER); ).
 
 lab1中完成了对哪些外设的访问？ (w2l2)
  ```
@@ -32,11 +35,9 @@ lab1中完成了对哪些外设的访问？ (w2l2)
  ```
 - [x]  
 
->  lab1中涉及到的外設包括:
-  1) 时钟, 产生时钟中断.
-  2) 串口和并口.
-  3) CGA, 作為显示器.
-  4) 物理存儲器, 使得對硬盘進行读寫.
+>  根据kern_init, 有相关外设的初始化:
+cons_init(), 其中有cga_init()对CGA(作为显示器), 有serial_init()对串口, 有kbd_init()对键盘初始化;有clock_init()对时钟进行初始化. 另外还有硬盘, 使读写数据.
+
 
 lab1中的cprintf函数最终通过哪些外设完成了对字符串的输出？ (w2l2)
  ```
