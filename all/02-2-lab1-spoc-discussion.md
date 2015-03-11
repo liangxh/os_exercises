@@ -20,7 +20,7 @@ NOTICE
  ```
 - [x]  
 
->  于init.c kern_init()中, 
+于init.c kern_init()中, 
 首先调用pic_init(), 对8259A中断控制器进行初始化, 先对中断屏蔽, 再设置master和slave.
 后调用idt_init(), 对中断向量逐个进行初始化, 并以lidt设置IDT的所在地址 (  lidt(&idt_pd); ).
 最后调用clock_init(), 设置8253时钟, 并对时钟使能(  pic_enable(IRQ_TIMER); ).
@@ -35,7 +35,7 @@ lab1中完成了对哪些外设的访问？ (w2l2)
  ```
 - [x]  
 
->  根据kern_init, 有相关外设的初始化:
+根据kern_init, 有相关外设的初始化:
 cons_init(), 其中有cga_init()对CGA(作为显示器), 有serial_init()对串口, 有kbd_init()对键盘初始化;有clock_init()对时钟进行初始化. 另外还有硬盘, 使读写数据.
 
 
@@ -49,11 +49,9 @@ lab1中的cprintf函数最终通过哪些外设完成了对字符串的输出？
  ```
 - [x]  
 
->  cprintf的函数调用过程如下:
-int cprintf() →int vcprintf() → void cputch() → cons_putc() → lpt_putc(c);
- cga_putc(c);
- serial_putc(c);
- 其中lpt_putc把c输至并口, 然后cga_putc(c)把c打印到屏幕, 最后serial_putc把c输至串口. 对字符串中每个字符都依次进行这三步.
+cprintf的函数调用过程如下:
+int cprintf() →int vcprintf() → void cputch() → cons_putc() → lpt_putc(c); cga_putc(c); serial_putc(c);
+其中lpt_putc把c输至并口, 然后cga_putc(c)把c打印到屏幕, 最后serial_putc把c输至串口. 对字符串中每个字符都依次进行这三步.
 
 ---
 
@@ -64,44 +62,44 @@ int cprintf() →int vcprintf() → void cputch() → cons_putc() → lpt_putc(c
 lab1中printfmt函数用到了可变参，请参考写一个小的linux应用程序，完成实现定义和调用一个可变参数的函数。(spoc)
 - [x]  
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
-void myprintf(char* format, ...){
-	char* flag = format;
-	va_list pArg;
-	va_start(pArg, format);
-
-	while (*flag){
-		switch(*flag){
-		case 'd': printf("INT : %d\n", *(int*)pArg); va_arg(pArg, int); break;
-		case 'f': printf("FLOAT : %lf\n", *(double*)pArg); va_arg(pArg, double); break;
-		case 'c': printf("CHAR : %c\n", *(char*)pArg); va_arg(pArg, int); break;	
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <stdarg.h>
+	
+	void myprintf(char* format, ...){
+		char* flag = format;
+		va_list pArg;
+		va_start(pArg, format);
+	
+		while (*flag){
+			switch(*flag){
+			case 'd': printf("INT : %d\n", *(int*)pArg); va_arg(pArg, int); break;
+			case 'f': printf("FLOAT : %lf\n", *(double*)pArg); va_arg(pArg, double); break;
+			case 'c': printf("CHAR : %c\n", *(char*)pArg); va_arg(pArg, int); break;	
+			}
+			flag++;	
 		}
-		flag++;	
 	}
-}
-
-
-void myprintf2(char* format, ...){
-	char* flag = format;
-	char* pArg = (char*)(&format +1);
-	while (*flag){
-		switch(*flag){
-		case 'd': printf("INT : %d\n", *(int*)pArg); pArg += sizeof(int); break;
-		case 'f': printf("FLOAT : %lf\n", *(double*)pArg); pArg += sizeof(double); break;
-		case 'c': printf("CHAR : %c\n", *(char*)pArg); pArg += sizeof(int); break;	
+	
+	
+	void myprintf2(char* format, ...){
+		char* flag = format;
+		char* pArg = (char*)(&format +1);
+		while (*flag){
+			switch(*flag){
+			case 'd': printf("INT : %d\n", *(int*)pArg); pArg += sizeof(int); break;
+			case 'f': printf("FLOAT : %lf\n", *(double*)pArg); pArg += sizeof(double); break;
+			case 'c': printf("CHAR : %c\n", *(char*)pArg); pArg += sizeof(int); break;	
+			}
+			flag++;	
 		}
-		flag++;	
 	}
-}
-
-int main(int argc, char** argv){
-	myprintf("fdcdf", 10.4, 4, 'A', 10, 4.0);	
-	myprintf2("fdcdf", 10.4, 4, 'A', 10, 4.0);	
-	return 0;
-}
+	
+	int main(int argc, char** argv){
+		myprintf("fdcdf", 10.4, 4, 'A', 10, 4.0);	
+		myprintf2("fdcdf", 10.4, 4, 'A', 10, 4.0);	
+		return 0;
+	}
 
 
 
