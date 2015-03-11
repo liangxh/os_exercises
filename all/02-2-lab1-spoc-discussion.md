@@ -64,6 +64,45 @@ int cprintf() →int vcprintf() → void cputch() → cons_putc() → lpt_putc(c
 lab1中printfmt函数用到了可变参，请参考写一个小的linux应用程序，完成实现定义和调用一个可变参数的函数。(spoc)
 - [x]  
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
+void myprintf(char* format, ...){
+	char* flag = format;
+	va_list pArg;
+	va_start(pArg, format);
+
+	while (*flag){
+		switch(*flag){
+		case 'd': printf("INT : %d\n", *(int*)pArg); va_arg(pArg, int); break;
+		case 'f': printf("FLOAT : %lf\n", *(double*)pArg); va_arg(pArg, double); break;
+		case 'c': printf("CHAR : %c\n", *(char*)pArg); va_arg(pArg, int); break;	
+		}
+		flag++;	
+	}
+}
+
+
+void myprintf2(char* format, ...){
+	char* flag = format;
+	char* pArg = (char*)(&format +1);
+	while (*flag){
+		switch(*flag){
+		case 'd': printf("INT : %d\n", *(int*)pArg); pArg += sizeof(int); break;
+		case 'f': printf("FLOAT : %lf\n", *(double*)pArg); pArg += sizeof(double); break;
+		case 'c': printf("CHAR : %c\n", *(char*)pArg); pArg += sizeof(int); break;	
+		}
+		flag++;	
+	}
+}
+
+int main(int argc, char** argv){
+	myprintf("fdcdf", 10.4, 4, 'A', 10, 4.0);	
+	myprintf2("fdcdf", 10.4, 4, 'A', 10, 4.0);	
+	return 0;
+}
+
 
 
 如果让你来一个阶段一个阶段地从零开始完整实现lab1（不是现在的填空考方式），你的实现步骤是什么？（比如先实现一个可显示字符串的bootloader（描述一下要实现的关键步骤和需要注意的事项），再实现一个可加载ELF格式文件的bootloader（再描述一下进一步要实现的关键步骤和需要注意的事项）...） (spoc)
