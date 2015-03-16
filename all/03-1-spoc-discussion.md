@@ -67,6 +67,153 @@ NOTICE
 
 请参考ucore lab2代码，采用`struct pmm_manager` 根据你的`学号 mod 4`的结果值，选择四种（0:最优匹配，1:最差匹配，2:最先匹配，3:buddy systemm）分配算法中的一种或多种，在应用程序层面(可以 用python,ruby,C++，C，LISP等高语言)来实现，给出你的设思路，并给出测试用例。 (spoc)
 
+```
+'''
+struct pmm_manager {
+    const char *name;                                 // XXX_pmm_manager's name
+    void (*init)(void);                               // initialize internal description&management data structure
+                                                      // (free block list, number of free block) of XXX_pmm_manager 
+    void (*init_memmap)(struct Page *base, size_t n); // setup description&management data structcure according to
+                                                      // the initial free physical memory space 
+    struct Page *(*alloc_pages)(size_t n);            // allocate >=n pages, depend on the allocation algorithm 
+    void (*free_pages)(struct Page *base, size_t n);  // free >=n pages with "base" addr of Page descriptor structures(memlayout.h)
+    size_t (*nr_free_pages)(void);                    // return the number of free pages 
+    void (*check)(void);                              // check the correctness of XXX_pmm_manager 
+};
+'''
+class pmm_manager:
+	max_size = 0
+	free_page_list = []	
+	def __init__(self, size):
+		self.init(size)
+
+	def init(self, size):
+		if size < 0:
+			print 'Positive size required'
+			return
+		self.max_size = size;
+		self.free_page_list = [(0, size)]
+
+	def alloc_pages(self, request_size):
+		if (request_size <= 0 or request_size > self.max_size):
+			return (-1, -1)
+
+		for i in range(len(self.free_page_list)):
+			(start, size) = self.free_page_list[i]
+			if size >= request_size:
+				if size == request_size:
+					del self.free_page_list[i]
+				else:
+					self.free_page_list[i] = (start + request_size, size - request_size)
+				print 'Alloc : ', (start, request_size)
+				return (start, request_size)
+		return (-1, -1)
+	
+	def free_pages(self, start, size):
+		if (start < 0 or start >= self.max_size or size <= 0 or start + size >= self.max_size):
+			return (-1, -1)
+		elif self.free_page_list == []:
+			self.free_page_list.append((start, size))
+		else:
+			(ex_start, ex_size) = self.free_page_list[0]
+			if start < ex_start:
+				end = start + size
+				if end > ex_start:
+					print 'free_pages failed : overlap'
+				if end == ex_start:
+					self.free_page_list[0] = (start, size + ex_size)
+				else:
+					self.free_page_list.insert(0, (start, size))
+			else:
+				list_len = len(self.free_page_list)
+				last_flag = list_len - 1
+				(ex_start, ex_size) = self.free_page_list[last_flag]
+				if ex_start < start:
+					ex_end = ex_start + ex_size
+					if ex_end > start: 
+						print 'free_pages failed : overlap'
+					if ex_end == start:
+						self.free_page_list[last_flag] = (ex_start, ex_size + size)
+					else:
+						self.free_page_list.append((start, size))
+				else:
+					l_flag = 0
+					r_flag = list_len - 1
+					while (l_flag + 1 < r_flag):
+						m_flag = (l_flag + r_flag) / 2
+						(m_start, m_size) = self.free_page_list[m_flag]
+						if m_start > start:
+							r_flag = m_flag
+						elif m_start < start:
+							l_flag = m_flag
+						else:
+							print 'free_pages error'
+							break
+					(r_start, r_size) = self.free_page_list[r_flag]
+					(l_start, l_size) = self.free_page_list[l_flag]
+					l_end = l_start + l_size
+					end = start + size
+					if l_end > start or end > r_start:
+						print 'free_pages failed : overlap'
+					if l_end == start:
+						if (end == r_start):
+							self.free_page_list[l_flag] = (l_start, l_size + size + r_size)
+							del self.free_page_list[r_flag]
+						else:
+							self.free_page_list[l_flag] = (l_start, l_size + size)
+					elif (end == r_start):
+						self.free_page_list[r_flag] = (start, size + r_size)
+					else:
+						self.free_page_list.insert(r_flag, (start, size))
+		print self.free_page_list
+
+	def nr_free_pages(self):
+		print len(self.free_page_list)
+		print self.free_page_list
+
+	def check(self):
+		if self.free_page_list == []:
+			print 'check() succeeded!'
+		else:
+			next_start, next_size = self.free_page_list[0]
+			next_end = next_start + next_size
+
+			(this_start, this_end) = (-1, -1)
+			for i in range(1, len(self.free_page_list)):
+				(this_start, this_end) = (next_start, next_end)
+				(next_start, next_size) = self.free_page_list[i]
+				next_end = next_start + next_size
+				if this_end > next_start:
+					print 'check() failed!'
+			print 'check() succeeded!'
+
+if __name__ == '__main__':
+	print 2012011290 % 4
+	#2, 实现最先匹配
+
+	alloc_list = []
+	mgr = pmm_manager(512)
+	alloc_list.append(mgr.alloc_pages(10))
+	alloc_list.append(mgr.alloc_pages(15))
+	alloc_list.append(mgr.alloc_pages(100))
+	alloc_list.append(mgr.alloc_pages(50))
+	alloc_list.append(mgr.alloc_pages(125))
+	alloc_list.append(mgr.alloc_pages(200))
+
+	start, size = alloc_list[3]
+	mgr.free_pages(start, size)
+	start, size = alloc_list[5]
+	mgr.free_pages(start, size)
+	start, size = alloc_list[4]
+	mgr.free_pages(start, size)
+	start, size = alloc_list[0]
+	mgr.free_pages(start, size)
+	alloc_list.append(mgr.alloc_pages(5))
+
+	mgr.check()
+	mgr.nr_free_pages()
+```
+
 --- 
 
 ## 扩展思考题
