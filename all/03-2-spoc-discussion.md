@@ -97,7 +97,7 @@ Virtual Address 7268:
       --> Translates to Physical Address 0xca8 --> Value: 16
 ```
 
-> 
+> 计算答案
 
 ```
 Virtual Address 0x6c74:
