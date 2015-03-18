@@ -97,6 +97,139 @@ Virtual Address 7268:
       --> Translates to Physical Address 0xca8 --> Value: 16
 ```
 
+> 
+
+```
+Virtual Address 0x6c74:
+    --> pde index: 0x1b pde contens:(valid 1, pfn 0x20)
+      --> pde index: 0x3 pde contens:(valid 1, pfn 0x61)
+        Translates to Physical Address 0xc34 --> Value: 0x6
+
+Virtual Address 0x6b22:
+    --> pde index: 0x1a pde contens:(valid 1, pfn 0x52)
+      --> pde index: 0x19 pde contens:(valid 1, pfn 0x47)
+        Translates to Physical Address 0x8e2 --> Value: 0x1a
+
+Virtual Address 0x3df:
+    --> pde index: 0x0 pde contens:(valid 1, pfn 0x5a)
+      --> pde index: 0x1e pde contens:(valid 1, pfn 0x5)
+        Translates to Physical Address 0xbf --> Value: 0xf
+
+Virtual Address 0x69dc:
+    --> pde index: 0x1a pde contens:(valid 1, pfn 0x52)
+      --> pde index: 0xe pde contens:(valid 0, pfn 0x7f)
+        --> Fault (page directory entry not valid)
+
+Virtual Address 0x317a:
+    --> pde index: 0xc pde contens:(valid 1, pfn 0x18)
+      --> pde index: 0xb pde contens:(valid 1, pfn 0x35)
+        Translates to Physical Address 0x6ba --> Value: 0x1e
+
+Virtual Address 0x4546:
+    --> pde index: 0x11 pde contens:(valid 1, pfn 0x21)
+      --> pde index: 0xa pde contens:(valid 0, pfn 0x7f)
+        --> Fault (page directory entry not valid)
+
+Virtual Address 0x2c03:
+    --> pde index: 0xb pde contens:(valid 1, pfn 0x44)
+      --> pde index: 0x0 pde contens:(valid 1, pfn 0x57)
+        Translates to Physical Address 0xae3 --> Value: 0x16
+
+Virtual Address 0x7fd7:
+    --> pde index: 0x1f pde contens:(valid 1, pfn 0x12)
+      --> pde index: 0x1e pde contens:(valid 0, pfn 0x7f)
+        --> Fault (page directory entry not valid)
+
+Virtual Address 0x390e:
+    --> pde index: 0xe pde contens:(valid 0, pfn 0x7f)
+      --> Fault (page directory entry not valid)
+
+Virtual Address 0x748b:
+    --> pde index: 0x1d pde contens:(valid 1, pfn 0x0)
+      --> pde index: 0x4 pde contens:(valid 0, pfn 0x7f)
+        --> Fault (page directory entry not valid)
+```
+
+Code
+
+```
+def hex_to_dec():
+	return
+
+def read_mem(fname):
+	fobj = open(fname, 'r')
+	mem = []
+	for line in fobj:
+		if line.startswith('page'):
+			tmp_line = line.split(':')
+			tmp_line = tmp_line[1].split(' ')
+			del tmp_line[0], tmp_line[len(tmp_line) - 1]
+			mem.append(tmp_line)
+	
+	zeros = []
+	zeros.append('')
+	for i in range(1, 9):
+		zeros.append('0' + zeros[-1])
+	
+	for i in range(len(mem)):
+		for j in range(len(mem[i])):
+			mem[i][j] = bin(int(mem[i][j], 16))
+			mem[i][j] = mem[i][j][2:len(mem[i][j])]
+			mem[i][j] = zeros[8-len(mem[i][j])] + mem[i][j]
+	
+	return mem
+
+if __name__ == '__main__':
+	mem = read_mem('mem.txt')
+	vas = ['6c74','6b22','03df','69dc','317a','4546','2c03','7fd7', '390e','748b'
+]
+
+	pdbr = int('220', 16) / 32
+
+	zeros = []
+	zeros.append('')
+	for i in range(1, 9):
+		zeros.append('0' + zeros[-1])
+
+	for va in vas:
+		va = bin(int(va, 16))
+		va = va[2: len(va)]
+		va = zeros[8 - len(va)] + va
+
+		va = va[(len(va) - 16):len(va)]
+		pde = int(va[1:6], 2)
+		pte = int(va[6:11], 2)
+		bias = int(va[11:16], 2)
+
+		indent = '  '
+		print 'Virtual Address ' + hex(int(va, 2)) + ':'
+		indent = '  '+indent
+		
+		content = mem[pdbr][pde]
+		index = int(content[1:8], 2)
+	
+		print indent + '--> pde index: '+ hex(pde) + ' pde contens:(valid ' + content[0] + ', pfn ' + hex(index) + ')'
+		indent = '  '+indent
+
+		if content[0] == '0':
+			print indent + '--> Fault (page directory entry not valid)\n'
+			continue
+	
+		content = mem[index][pte]
+		index = int(content[1:8], 2)
+		print indent + '--> pde index: '+ hex(pte) + ' pde contens:(valid ' + content[0] + ', pfn ' + hex(index) + ')'
+		indent = '  '+indent
+
+		if content[0] == '0':
+			print indent + '--> Fault (page directory entry not valid)\n'
+			continue
+
+		value = mem[index][bias]
+		index = bin(index)
+		index = hex(int(index[2:len(index)] + va[11:16], 2))
+		print indent + 'Translates to Physical Address '+index+' --> Value: ' +hex(int(value, 2))+ '\n'
+		
+```
 
 
 （3）请基于你对原理课二级页表的理解，并参考Lab2建页表的过程，设计一个应用程序（可基于python, ruby, C, C++，LISP等）可模拟实现(2)题中描述的抽象OS，可正确完成二级页表转换。
