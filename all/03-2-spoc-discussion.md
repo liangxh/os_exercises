@@ -150,12 +150,9 @@ Virtual Address 0x748b:
         --> Fault (page directory entry not valid)
 ```
 
-Code
+代码, 其中 mem.txt为03-2-spoc-testdata.md中的数据
 
 ```
-def hex_to_dec():
-	return
-
 def read_mem(fname):
 	fobj = open(fname, 'r')
 	mem = []
@@ -181,8 +178,7 @@ def read_mem(fname):
 
 if __name__ == '__main__':
 	mem = read_mem('mem.txt')
-	vas = ['6c74','6b22','03df','69dc','317a','4546','2c03','7fd7', '390e','748b'
-]
+	vas = ['6c74','6b22','03df','69dc','317a','4546','2c03','7fd7', '390e','748b']
 
 	pdbr = int('220', 16) / 32
 
