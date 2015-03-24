@@ -32,6 +32,44 @@ x86保护模式中权限管理无处不在，下面哪些时候要检查访问�
 
 >  
 
+```
+ucore OS讓頁機制正常工作的準備工作於pmm_init()中進行
+對GDT的初始化透過調用gdt_init()完成,　內容如下.
+
+static void
+gdt_init(void) {
+    // 設定內核棧用的ss, esp
+    load_esp0((uintptr_t)bootstacktop);
+    ts.ts_ss0 = KERNEL_DS;
+
+    // 對GDT中TSS一項賦最終的值
+    gdt[SEG_TSS] = SEGTSS(STS_T32A, (uintptr_t)&ts, sizeof(ts), DPL_KERNEL);
+
+    // 重新設定各個段寄存器包括ss, ds, es, fs, gs
+    lgdt(&gdt_pd);
+
+    // 載入TSS
+    ltr(GD_TSS);
+}
+
+对物理内存的探测和空闲物理内存的管理透過調用page_init()完成,　其中以 struct e820map *memmap = (struct e820map *)(0x8000 + KERNBASE);　取得物理內存的信息,　經過遍歴找出begin > KMEMSIZE且end地址越大的空間. 然后對該空間中每個頁設置為reserved. 再次遍歴memmap中每塊內存空間, 對當中個別滿足條件的空間建立映射關係　(?其實目測没看懂代碼在做什么)
+
+對页表建立初始过程透過調用boot_map_segment()完成, 過個對每個la和pa的關係填寫pte
+
+使能頁機制透過調用enable_paging()完成,　首先直接賦值cr3為boot_cr3, 再經過取得cr0的值,　對個別位置'1',　對cr0重新賦值來完成.
+
+static void
+enable_paging(void) {
+    lcr3(boot_cr3);
+
+    // turn on paging
+    uint32_t cr0 = rcr0();
+    cr0 |= CR0_PE | CR0_PG | CR0_AM | CR0_WP | CR0_NE | CR0_TS | CR0_EM | CR0_MP;
+    cr0 &= ~(CR0_TS | CR0_EM);
+    lcr0(cr0);
+}
+```
+
 ---
 
 ## 小组思考题
