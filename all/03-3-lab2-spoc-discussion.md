@@ -52,11 +52,16 @@ gdt_init(void) {
     ltr(GD_TSS);
 }
 
-对物理内存的探测和空闲物理内存的管理透過調用page_init()完成,　其中以 struct e820map *memmap = (struct e820map *)(0x8000 + KERNBASE);　取得物理內存的信息,　經過遍歴找出begin > KMEMSIZE且end地址越大的空間. 然后對該空間中每個頁設置為reserved. 再次遍歴memmap中每塊內存空間, 對當中個別滿足條件的空間建立映射關係　(?其實目測没看懂代碼在做什么)
+对物理内存的探测和空闲物理内存的管理透過調用page_init()完成,　
+其中以 struct e820map *memmap = (struct e820map *)(0x8000 + KERNBASE);　
+取得物理內存的信息,　經過遍歴找出begin > KMEMSIZE且end地址越大的空間. 
+然后對該空間中每個頁設置為reserved. 再次遍歴memmap中每塊內存空間, 對當中個別滿足條件的空間建立映射關係　(?其實目測没看懂代碼在做什么)
 
 對页表建立初始过程透過調用boot_map_segment()完成, 過個對每個la和pa的關係填寫pte
 
-使能頁機制透過調用enable_paging()完成,　首先直接賦值cr3為boot_cr3, 再經過取得cr0的值,　對個別位置'1',　對cr0重新賦值來完成.
+使能頁機制透過調用enable_paging()完成,　
+首先直接賦值cr3為boot_cr3, 再經過取得cr0的值,　
+對個別位置'1',　對cr0重新賦值來完成.
 
 static void
 enable_paging(void) {
