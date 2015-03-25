@@ -117,6 +117,111 @@ Virtual Address 1e6f(0 001_11 10_011 0_1111):
       --> To Disk Sector Address 0x2cf(0001011001111) --> Value: 1c
 ```
 
+Source Code 
+```
+
+def read_mem(fname):
+	fobj = open(fname, 'r')
+	mem = []
+	text = []
+	for line in fobj:
+		text.append(line[0:len(line) - 1])
+		line = line.split(':')[1].split(' ')
+		del line[len(line) - 1], line[0]
+		for i in range(len(line)):
+			line[i] = int(line[i], 16)
+		mem.append(line)
+	print mem[0]
+	return mem, text
+
+def page_num(addr):
+	return addr >> 5
+
+if __name__ == '__main__':
+	disk, disk_text = read_mem('disk.txt')
+	mem, mem_text = read_mem('mem.txt')
+	pdbr = 0xd80
+	pnum = page_num(pdbr)
+	print_hex(pnum)	
+
+	vas = [0x6653, 0x1c13, 0x6890, 0x0af6, 0x1e6f]
+	for va in vas:
+		print 'Virtual Address %04x(%s):'%(va, bin(va))
+
+		pde = (va >> 10) & 0b11111
+		pde_content = mem[pnum][pde]
+		valid = pde_content >> 7 & 0b01
+		pfn = pde_content & 0b01111111
+		print (
+			'  --> pde index:0x%08x pde contents:('
+			'0x%02x, %s, valid %d, pfn 0x%02x)'%
+			(
+				pde, pde_content, bin(pde_content), valid, pfn
+			)
+		)
+		print '  ' + mem_text[pnum]
+		
+		if valid == 0:
+			continue
+
+		pte = (va >> 5) & 0b11111
+		pte_content = mem[pfn][pte]
+		valid = pte_content >> 7 & 0b01
+		pfn = pte_content & 0b01111111
+		print (
+			'    --> pte index:0x%08x pte contents:('
+			'0x%02x, %s, valid %d, pfn 0x%02x)'%
+			(
+				pte, pte_content, bin(pte_content), valid, pfn
+			)
+		)
+		print '  ' + mem_text[pfn]
+
+		index = (va & 0b11111)
+		value = 0
+		pa = (pfn << 5) | index
+		if valid == 1:
+			print '      To Physical Address 0x%08x(%s) --> Value: %02x'%(pa, bin(pa), mem[pfn][index])
+
+		elif pfn != 0x7f:
+			print '      To Disk Sector Address 0x%08x(%s) --> Value: %02x'%(pa, bin(pa), disk[pfn][index])
+
+		else:
+			print '      --> Invalid page number 0x7f'
+		print ''
+
+```
+
+Result
+```
+Virtual Address 6653(0b110011001010011):
+  --> pde index:0x00000019 pde contents:(0x7f, 0b1111111, valid 0, pfn 0x7f)
+  page 6c: e1 b5 a1 c1 b3 e4 a6 bd 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 
+Virtual Address 1c13(0b1110000010011):
+  --> pde index:0x00000007 pde contents:(0xbd, 0b10111101, valid 1, pfn 0x3d)
+  page 6c: e1 b5 a1 c1 b3 e4 a6 bd 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 
+    --> pte index:0x00000000 pte contents:(0xf6, 0b11110110, valid 1, pfn 0x76)
+  page 76: 1a 1b 1c 10 0c 15 08 19 1a 1b 12 1d 11 0d 14 1e 1c 18 02 12 0f 13 1a 07 16 03 06 18 0a 19 03 04 
+      To Physical Address 0x00000ed3(0b111011010011) --> Value: 12
+
+Virtual Address 6890(0b110100010010000):
+  --> pde index:0x0000001a pde contents:(0x7f, 0b1111111, valid 0, pfn 0x7f)
+  page 6c: e1 b5 a1 c1 b3 e4 a6 bd 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 
+Virtual Address 0af6(0b101011110110):
+  --> pde index:0x00000002 pde contents:(0xa1, 0b10100001, valid 1, pfn 0x21)
+  page 6c: e1 b5 a1 c1 b3 e4 a6 bd 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 
+    --> pte index:0x00000017 pte contents:(0x7f, 0b1111111, valid 0, pfn 0x7f)
+  page 7f: 08 0f 1c 0a 13 17 13 17 06 1d 05 12 09 13 09 0d 15 08 16 0a 04 13 05 0d 0c 02 16 15 18 10 11 05 
+      --> Invalid page number 0x7f
+
+Virtual Address 1e6f(0b1111001101111):
+  --> pde index:0x00000007 pde contents:(0xbd, 0b10111101, valid 1, pfn 0x3d)
+  page 6c: e1 b5 a1 c1 b3 e4 a6 bd 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 
+    --> pte index:0x00000013 pte contents:(0x16, 0b10110, valid 0, pfn 0x16)
+  page 16: 07 1c 0b 19 0d 0b 17 13 08 12 15 19 14 13 12 02 1d 16 08 15 13 14 0b 11 14 06 0f 03 03 1c 03 1b 
+      To Disk Sector Address 0x000002cf(0b1011001111) --> Value: 1c
+```
+
 ## 扩展思考题
 ---
 (1)请分析原理课的缺页异常的处理流程与lab3中的缺页异常的处理流程（分析粒度到函数级别）的异同之处。
