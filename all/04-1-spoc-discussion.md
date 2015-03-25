@@ -161,7 +161,6 @@ def read_mem(fname):
 		for i in range(len(line)):
 			line[i] = int(line[i], 16)
 		mem.append(line)
-	print mem[0]
 	return mem, text
 
 def page_num(addr):
