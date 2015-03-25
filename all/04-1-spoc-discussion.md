@@ -35,6 +35,36 @@ time ./goodlocality
 ```
 可以看到其执行时间。
 
+```
+对原本代码
+anonymous@Acer:~/Documents$ time ./goodlocality
+10485760 count computing over!
+
+real	0m0.042s
+user	0m0.042s
+sys	0m0.000s
+
+若把A[i][j] = i+j;改为A[j][i] = i+j;
+anonymous@Acer:~/Documents$ time ./goodlocality
+10485760 count computing over!
+
+real	0m0.167s
+user	0m0.163s
+sys	0m0.004s
+
+若把for (k = 0; k<COUNT; k++)改成最内层的循环
+
+anonymous@Acer:~/Documents$ time ./goodlocality
+10485760 count computing over!
+
+real	0m0.033s
+user	0m0.033s
+sys	0m0.000s
+
+可见代码的修改对运行时间可以有相当的影响(速度减慢到原本的1/4)
+```
+
+
 ## 小组思考题目
 ----
 
