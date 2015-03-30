@@ -35,7 +35,59 @@
 
 (2)（spoc）根据你的`学号 mod 4`的结果值，确定选择四种替换算法（0：LRU置换算法，1:改进的clock 页置换算法，2：工作集页置换算法，3：缺页率置换算法）中的一种来设计一个应用程序（可基于python, ruby, C, C++，LISP等）模拟实现，并给出测试。请参考如python代码或独自实现。
  - [页置换算法实现的参考实例](https://github.com/chyyuu/ucore_lab/blob/master/related_info/lab3/page-replacement-policy.py)
- 
+
+```
+if __name__ == '__main__':
+	print 2012011290 % 4
+
+	#example from video 05
+	addrList = [3, 3, 4, 2, 3, 5, 3, 5, 1, 4]
+	memory = [1, 4, 5]
+	memory_t = [0, 1, 2]
+
+	miss = 0
+	hits = 0
+	threshold = 4
+
+	for n in addrList:
+            idx = -1
+	    for i in range(len(memory)):
+		if memory[i] == n:
+		    idx = i
+		    break
+	    if idx != -1:
+		hits = hits + 1
+		memory_t[idx] = -1
+		
+	    else:
+		miss = miss + 1
+		memory.append(n)
+		memory_t.append(-1)
+		
+
+	    del_list = []
+
+	    for i in range(len(memory)):
+		memory_t[i] = memory_t[i] + 1
+		if memory_t[i] == threshold:
+		    del_list.append(i)
+
+	    for i in range(len(del_list)):
+		del memory[del_list[i] - i]
+		del memory_t[del_list[i] - i]
+
+	    if idx != -1:
+		print 'Access: %d HIT -> '%(n), memory, ' <- Replaced:- [Hits:%d Missess:%d]'%(hits, miss)
+	    else:
+		print 'Access: %d MISS -> '%(n), memory, ' <- Replaced:- [Hits:%d Missess:%d]'%(hits, miss) 
+		
+
+	print ''
+	print 'FINALSTATS hits %d   misses %d   hitrate %.2f' % (hits, miss, (100.0*float(hits))/(float(hits)+float(miss)))
+	print ''
+
+```
+
 ## 扩展思考题
 （1）了解LIRS页置换算法的设计思路，尝试用高级语言实现其基本思路。此算法是江松博士（导师：张晓东博士）设计完成的，非常不错！
 
