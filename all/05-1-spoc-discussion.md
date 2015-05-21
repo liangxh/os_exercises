@@ -374,3 +374,7 @@ if options.print_stats:
     print 'Stats: Total Time %d' % clock_tick
     print ''
 ```
+
+> solution
+https://github.com/liangxh/os_exercises/blob/master/all/lec10-process-concept-homework.py
+
