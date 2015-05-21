@@ -39,8 +39,8 @@
 
 ## 小组思考题
  - (spoc)完成磁盘访问与磁盘寻道算法的作业，具体帮助和要求信息请看[disksim指导信息](https://github.com/chyyuu/ucore_lab/blob/master/related_info/lab8/disksim-homework.md)和[disksim参考代码](https://github.com/chyyuu/ucore_lab/blob/master/related_info/lab8/disksim-homework.py)
- - 
  
-https://github.com/liangxh/os_exercises/blob/master/all/disksim_result.txt
+> Solution: https://github.com/liangxh/os_exercises/blob/master/all/disksim_result.txt
+
 
 
